@@ -1,6 +1,16 @@
 ---
 title: "Experiment Design -- Dough Rising"
-output: html_document
+knit: (function(input_file, encoding) {
+  out_dir <- 'docs';
+  rmarkdown::render(input_file,
+  encoding=encoding,
+  output_file=file.path(dirname(input_file), out_dir, 'index.html'))})
+output: 
+  html_document:
+    toc: true
+    number_section: true
+    theme: united
+
 ---
 
 ```{r setup, include=FALSE}
@@ -34,15 +44,18 @@ Response Variable: diameter of the dough
 
 $Y_{ijk}$ = $\mu$ + $\tau_{i}$ + $\beta_{j}$ + $\epsilon_{ijk}$
 
-<\center>
-where $Y_{ijk}$ is the response, diameter of the dough after rising
-      $\mu$ is the overall mean
-      $\tau_{i}$ is the treatment effects
-      $\beta_{j}$ is block effect  
-      $\epsilon_{ijk}$ is the normal error terms
+</center>
 
 
-**Pilot Study and Power Analysis**
+where $Y_{ijk}$ is the response, diameter of the dough after rising  
+      $\mu$ is the overall mean  
+      $\tau_{i}$ is the treatment effects  
+      $\beta_{j}$ is block effect    
+      $\epsilon_{ijk}$ is the normal error terms  
+
+
+**Pilot Study and Power Analysis**  
+
 In this experiment, experimenters pre-determined and followed the fundamental rule of randomization in the assignment of experimental units to the treatments to avoid bias and confounding. Power analysis determined the sample size n=4, meaning 4 observations per treatment per block (treatment-block combination), therefore each experimenter performed 4*4 individual sub-experiments. The randomization within each block is considered in two aspects.
 
 <br>
@@ -55,11 +68,12 @@ In this experiment, experimenters pre-determined and followed the fundamental ru
 $H_{0}$: $\tau_{1}$ = $\tau_{2}$ = $\tau_{3}$ = $\tau_{4}$
 $H_{a}$: At leaset two $\tau_{i}$ differ.
 
-<\center>
+</center>
 
 ## Test
 **Read data**
-```{r}
+```{r message=FALSE}
+library(tidyverse)
 doughrising = read.csv("/Users/BinLi/Desktop/DoughRising.csv", head = TRUE)
 head(doughrising)
 
@@ -90,7 +104,7 @@ doughrising %>% group_by(Treatment) %>%
 <br>
 The mean diameters in the blocks are very similar. The variance is a little bit different.   
 <br>
-```{r}
+```{r message=FALSE}
 doughrising %>% group_by(Block) %>% 
   summarise(N = n(),
             Mean = mean(Diameter),
@@ -100,11 +114,11 @@ doughrising %>% group_by(Block) %>%
 ```
 <br>
 
-(3) Boxplots 
+(3) Boxplots   
 <br>
 The boxplots correspond to the summary statistics above. In the first boxplot, a clear positive relationship can be observed between treatment and diameter. The second one shows the block factor: the mean and median of the two blocks are very similar, and difference in variance is identified.    
 <br>
-```{r}
+```{r message=FALSE, warning=FALSE}
 library(ggplot2)
 ggplot(aes(x = Treatment, y = Diameter), data = doughrising) +
   geom_boxplot() +
@@ -116,7 +130,7 @@ ggplot(aes(x = Treatment, y = Diameter), data = doughrising) +
 <br>
 
 
-```{r message=FALSE}
+```{r message=FALSE, warning=FALSE}
 ggplot(aes(x = Block, y = Diameter), data = doughrising) +
   geom_boxplot() +
   labs(title = "Boxplot for Diameter Grouped by Block Factor") +
@@ -132,7 +146,7 @@ ggplot(aes(x = Block, y = Diameter), data = doughrising) +
 From the ANOVA table, we can see that the P-value of our treatment factor is very small, indicating we need to reject our null hypothesis of equal treatment effects. In fact, results indicate that the amount of dry yeast does affect the diameter/size of the rising dough. At the same time, the table tells us that the block factor is not significant thus we do not need to worry about it.  
 <br>
 
-```{r}
+```{r message=FALSE}
 aov.fit = aov(Diameter ~ Treatment + Block, data = doughrising)
 summary(aov.fit)
 ```
@@ -143,7 +157,7 @@ summary(aov.fit)
 The results of multiple comparison adjusted by Tukey’s Method is shown below. The estimate of differences of least square means between 1⁄2 teaspoon and 1⁄4 teaspoon groups is small and the large p-value suggests that this pair is not significantly different, whereas all of the other pair-wise comparisons are significant with small p-values.  
 <br>
 
-```{r}
+```{r message=FALSE}
 TukeyHSD(aov.fit)
 ```
 <br>
@@ -154,7 +168,7 @@ TukeyHSD(aov.fit)
 <br>
 Residuals do not seem to vary with respect to the predicted mean, thus the constant variance assumption is not violated.  
 <br>
-```{r}
+```{r message=FALSE}
 library(car)
 plot(aov.fit,1)
 leveneTest(Diameter ~ Treatment , data = doughrising)
@@ -166,7 +180,7 @@ leveneTest(Diameter ~ Treatment , data = doughrising)
 Most residual points on the Normal QQ-plot lies along the straight line, and Shapiro-wilk test indicates normality as well. therefore normality assumption holds.
 <br>
 
-```{r}
+```{r message=FALSE}
 plot(aov.fit, 2)
 # Extract the residuals
 aov.residuals <- residuals(object = aov.fit )
@@ -200,4 +214,7 @@ Based on the statistical analysis, we conclude that the amount of dry yeast affe
 # Note
 
 This is a course project done by Bin Li and Wen Pan. 
+<br>
+<br>
+<br>
 
